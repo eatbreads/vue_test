@@ -1,11 +1,4 @@
-import axios from "axios";
-
-const apiClient = axios.create({
-  baseURL: "http://localhost:8080/api", // 替换为后端地址
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+import apiClient from "@/api/index";
 
 // 登录接口
 export const login = async (email: string, password: string) => {

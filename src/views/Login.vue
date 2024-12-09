@@ -18,7 +18,7 @@
   
   <script lang="ts">
   import { defineComponent, ref } from "vue";
-  import { useStore } from "vuex";
+  import { useAuthStore } from "@/stores"; // 使用 Pinia 的 auth store
   import { useRouter } from "vue-router";
   
   export default defineComponent({
@@ -27,12 +27,12 @@
       const email = ref("");
       const password = ref("");
       const error = ref("");
-      const store = useStore();
+      const authStore = useAuthStore(); // 获取 auth store
       const router = useRouter();
   
       const handleLogin = async () => {
         try {
-          await store.dispatch("login", { email: email.value, password: password.value });
+          await authStore.login(email.value, password.value); // 调用 Pinia 的 login 方法
           error.value = "";
           router.push("/"); // 登录成功后跳转首页
         } catch (err: any) {

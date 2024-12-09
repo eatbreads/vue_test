@@ -1,42 +1,52 @@
-import { createStore } from "vuex";
+import { defineStore } from "pinia";
 
-export default createStore({
-  state: {
-    token: "", // 保存登录后的 Token
-    user: null, // 保存用户信息
-  },
-  mutations: {
-    setToken(state, token: string) {
-      state.token = token;
-    },
-    setUser(state, user: object) {
-      state.user = user;
-    },
-    clearAuth(state) {
-      state.token = "";
-      state.user = null;
-    },
-  },
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  role: string;
+  password?: string;
+}
+
+export const useAuthStore = defineStore("auth", {
+  state: () => ({
+    token: "",
+    user: {
+      id: 0,
+      username: "",
+      email: "",
+      role: "",
+    } as User,
+  }),
   actions: {
-    login({ commit }, { email, password }: { email: string; password: string }) {
-      // 发起登录请求
-      return new Promise((resolve, reject) => {
-        import("@/api/user") // 动态导入 User API 模块
-          .then(({ login }) => {
-            login(email, password)
-              .then((response) => {
-                commit("setToken", response.data.token);
-                commit("setUser", response.data.user);
-                resolve(response);
-              })
-              .catch((error) => {
-                reject(error);
-              });
-          });
-      });
+    setToken(token: string) {
+      this.token = token;
     },
-    logout({ commit }) {
-      commit("clearAuth");
+    setUser(user: User) {
+      this.user = user;
+    },
+    clearAuth() {
+      this.token = "";
+      this.user = {
+        id: 0,
+        username: "",
+        email: "",
+        role: "",
+      }; // 重置为默认值
+    },
+    async login(email: string, password: string) {
+      try {
+        const { login } = await import("@/api/user");
+        const response = await login(email, password);
+        this.setToken(response.data.token);
+        this.setUser(response.data.user as User); // 类型断言
+        return response;
+      } catch (error) {
+        throw error;
+      }
+    },
+    logout() {
+      this.clearAuth();
     },
   },
   getters: {

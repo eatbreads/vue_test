@@ -1,11 +1,15 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "@/views/Home.vue";
 import Login from "@/views/Login.vue";
-import store from "@/stores";
+import VideoChat from "@/views/VideoChat.vue"; // 引入 VideoChat 组件
+import Chat from "@/views/Chat.vue"; // 引入 Chat 组件
+import { useAuthStore } from "@/stores/index.ts"; // 引入 auth store
 
 const routes = [
   { path: "/", name: "Home", component: Home, meta: { requiresAuth: true } },
   { path: "/login", name: "Login", component: Login },
+  { path: "/video-chat", name: "VideoChat", component: VideoChat, meta: { requiresAuth: true } }, // 添加视频通话路由
+  { path: "/chat", name: "Chat", component: Chat, meta: { requiresAuth: true } }, // 添加聊天路由
 ];
 
 const router = createRouter({
@@ -15,14 +19,10 @@ const router = createRouter({
 
 // 路由守卫
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !store.getters.isAuthenticated) {
-    if (to.name === "Home") {
-      // 如果未登录且访问的是 Home 页面，允许通过
-      next();
-    } else {
-      // 否则跳转到 Login 页面
-      next("/login");
-    }
+  const authStore = useAuthStore(); // 获取 Pinia 的 auth store
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    // 如果需要认证且未登录
+    next("/login");
   } else {
     next();
   }
